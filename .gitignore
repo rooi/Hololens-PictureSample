@@ -18,10 +18,10 @@
 /[Aa]ssets/Packages/
 
 # Assets MixedReality.. packages
-/[Aa]ssets/MixedReality*
-/[Aa]ssets/TextMesh*
-/[Aa]ssets/MixedReality*.meta
-/[Aa]ssets/TextMesh*.meta
+#/[Aa]ssets/MixedReality*
+#/[Aa]ssets/TextMesh*
+#/[Aa]ssets/MixedReality*.meta
+#/[Aa]ssets/TextMesh*.meta
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 #!/[Aa]ssets/**/*.meta
