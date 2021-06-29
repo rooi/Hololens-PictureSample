@@ -74,32 +74,33 @@ public class PhotoCamera : MonoBehaviour
         GameObject quad = newElement.transform.Find("Quad").gameObject;
         Renderer quadRenderer = quad.GetComponent<Renderer>() as Renderer;
         quadRenderer.material.mainTexture = targetTexture;
+        quadRenderer.material = new Material(Shader.Find("AR/HolographicImageBlend"));
         // new Material(Shader.Find("Unlit/Texture"));
 
         // Set position and rotation 
         // Bug in Hololens v2 and Unity 2019 about PhotoCaptureFrame not having the location data - March 2020
         // 
-        // Matrix4x4 cameraToWorldMatrix;
-        // photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix);
-        //  Vector3 position = cameraToWorldMatrix.MultiplyPoint(Vector3.zero);
-        //  Quaternion rotation = Quaternion.LookRotation(-cameraToWorldMatrix.GetColumn(2), cameraToWorldMatrix.GetColumn(1));
-        // Vector3 cameraForward = cameraToWorldMatrix * Vector3.forward;
+        if (photoCaptureFrame.hasLocationData)
+        {
+            Matrix4x4 cameraToWorldMatrix;
+            photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix);
+            Matrix4x4 worldToCameraMatrix = cameraToWorldMatrix.inverse;
 
+            Vector3 position = cameraToWorldMatrix.GetColumn(3) - cameraToWorldMatrix.GetColumn(2);
+            Quaternion rotation = Quaternion.LookRotation(-cameraToWorldMatrix.GetColumn(2), cameraToWorldMatrix.GetColumn(1));
 
+            Matrix4x4 projectionMatrix;
+            photoCaptureFrame.TryGetProjectionMatrix(out projectionMatrix);
+            //photoCaptureFrame.TryGetProjectionMatrix(Camera.main.nearClipPlane, Camera.main.farClipPlane, out Matrix4x4 projectionMatrix);
 
+            quadRenderer.sharedMaterial.SetTexture("_MainTex", targetTexture);
+            quadRenderer.sharedMaterial.SetMatrix("_WorldToCameraMatrix", worldToCameraMatrix);
+            quadRenderer.sharedMaterial.SetMatrix("_CameraProjectionMatrix", projectionMatrix);
+            quadRenderer.sharedMaterial.SetFloat("_VignetteScale", 1.0f);
 
-
-
-        Vector3 cameraForward = Camera.main.transform.forward;
-        cameraForward.Normalize();
-        newElement.transform.position  = Camera.main.transform.position + (cameraForward * 0.6f);
-        
-        newElement.transform.rotation = Quaternion.LookRotation(cameraForward, Vector3.up);
-        Vector3 scale = newElement.transform.localScale;
-        scale.y = scale.y* ratio; // scale the entire photo on height
-        newElement.transform.localScale = scale;
-
-
+            quad.transform.position = position;
+            quad.transform.rotation = rotation;
+        }
 
 
     }
